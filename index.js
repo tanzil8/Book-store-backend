@@ -11,7 +11,13 @@ app.get('/', (req, res) => {
 })
  
 try {
-    mongoose.connect(URI)
+    mongoose.connect(URI,{
+      useNewUrlParser: true,
+      useUndefinedTopology: true
+    })
+
+   console.log("MondoDB is connected")
+    
 } catch (error) {
     console.log(error);
     
