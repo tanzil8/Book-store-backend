@@ -18,7 +18,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Global cache (IMPORTANT for serverless)
+// ✅ Global cache (serverless optimized)
 let cached = global.mongoose;
 
 if (!cached) {
@@ -29,9 +29,17 @@ async function connectToMongoDB() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGO_URI).then((mongoose) => {
+    cached.promise = mongoose.connect(process.env.MONGO_URI, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000, // ❗ timeout add
+    })
+    .then((mongoose) => {
       console.log("MongoDB connected");
       return mongoose;
+    })
+    .catch((err) => {
+      console.error("MongoDB connection error:", err);
+      throw err; // ❗ important
     });
   }
 
@@ -39,10 +47,22 @@ async function connectToMongoDB() {
   return cached.conn;
 }
 
-// ✅ Middleware to ensure DB connection
+// ✅ Middleware with error handling (VERY IMPORTANT)
 app.use(async (req, res, next) => {
-  await connectToMongoDB();
-  next();
+  try {
+    await connectToMongoDB();
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      message: "Database connection failed",
+      error: error.message,
+    });
+  }
+});
+
+// ✅ Test route (debug ke liye useful)
+app.get("/test", (req, res) => {
+  res.send("Backend working ✅");
 });
 
 // Routes
