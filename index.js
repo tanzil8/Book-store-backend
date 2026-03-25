@@ -4,9 +4,9 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dns from "dns";
 
-import bookRoute from "../routers/book.router.js";
-import signupRouter from "../routers/signup.route.js";
-import loginRouter from "../routers/login.route.js";
+import bookRoute from "./routers/book.router.js";
+import signupRouter from "./routers/signup.route.js";
+import loginRouter from "./routers/login.route.js";
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
